@@ -11,7 +11,7 @@ inputs:
   cfn_capabilities:
     description: "Comma separated list of capabilities to enable. (values: CAPABILITY_IAM, CAPABILITY_NAMED_IAM, CAPABILITY_RESOURCE_POLICY, CAPABILITY_RESOURCE_POLICY)"
     required: false
-    default: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
+    default: CAPABILITY_IAM
   cfn_exec_role_name:
     description: Name of CloudFormation IAM execution role
     required: false
@@ -104,6 +104,10 @@ runs:
       env:
         BRANCH: ${{ env.GITHUB_EVENT_REF_SLUG_URL }}
         TAGS_FILE: ${{ inputs.cfn_tags_file }}
+        GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+        GITHUB_REF_NAME: ${{ env.GITHUB_REF_NAME }}
+        GITHUB_SHA: ${{ env.GITHUB_SHA }}
+        STACK_NAME: ${{ steps.set-stack-name.outputs.name }}
       run: |
         AWS_CFN_TAGS=$(
           cat $TAGS_FILE |
@@ -114,7 +118,7 @@ runs:
               "org:repo=${GITHUB_REPOSITORY}",
               "org:branch=${GITHUB_REF_NAME}",
               "org:commit=${GITHUB_SHA}",
-              "org:stackName=${{ steps.set-stack-name.outputs.name }}"
+              "org:stackName=${STACK_NAME}"
             ] |
             join(",")
           '
