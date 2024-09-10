@@ -11,9 +11,11 @@ inputs:
   cfn_capabilities:
     description: "Comma separated list of capabilities to enable. (values: CAPABILITY_IAM, CAPABILITY_NAMED_IAM, CAPABILITY_RESOURCE_POLICY, CAPABILITY_RESOURCE_POLICY)"
     required: false
+    default: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
   cfn_exec_role_name:
-    description: Name of optional CloudFormation IAM execution role
+    description: Name of CloudFormation IAM execution role
     required: false
+    default: CfnExecIamRole
   cfn_parameters_file:
     description: Name of CFN parameters file
     required: false
@@ -28,10 +30,11 @@ inputs:
   template_file:
     description: Name of template file to deploy
     required: false
-    default: template.yaml
+    default: packaged-template.yaml
   sam_s3_bucket:
     description: S3 bucket for SAM deployment
     required: false
+    default: aws-sam-cli-sourcebucket-346402060170-us-east-1
   sam_s3_prefix:
     description: S3 prefix for SAM deployment
     required: false
