@@ -11,7 +11,7 @@ inputs:
   cfn_capabilities:
     description: "Space separated list of capabilities to enable. (values: CAPABILITY_IAM, CAPABILITY_NAMED_IAM, CAPABILITY_AUTO_EXPAND, CAPABILITY_RESOURCE_POLICY)"
     required: false
-    default: CAPABILITY_IAM CAPABILITY_NAMED_IAM
+    default: CAPABILITY_NAMED_IAM
   cfn_exec_role_name:
     description: Name of CloudFormation IAM execution role
     required: false
