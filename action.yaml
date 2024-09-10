@@ -38,6 +38,14 @@ inputs:
   sam_s3_prefix:
     description: S3 prefix for SAM deployment
     required: false
+  env_json:
+    description: JSON string of environment variables to pass to the action
+    required: false
+    default: '{}'
+  secrets_json:
+    description: JSON string of secrets to pass to the action
+    required: false
+    default: '{}'
 
 runs:
   using: composite
@@ -103,7 +111,7 @@ runs:
             to_entries |
             map("\(.key)=\(.value|tostring)") |
             . += [
-              "org:repo=${GITHUB_REPOSITORY}"
+              "org:repo=${GITHUB_REPOSITORY}",
               "org:branch=${GITHUB_REF_NAME}",
               "org:commit=${GITHUB_SHA}",
               "org:stackName=${{ steps.set-stack-name.outputs.name }}"
@@ -118,8 +126,8 @@ runs:
       id: process-aws-parameters
       shell: bash
       env:
-        GHA_SECRETS: ${{ toJson(secrets) }}
-        GHA_ENV: ${{ toJson(env) }}
+        GHA_SECRETS: ${{ inputs.secrets_json }}
+        GHA_ENV: ${{ inputs.env_json }}
         PARAMS_FILE: ${{ inputs.cfn_parameters_file }}
       run: |
         AWS_CFN_PARAMS=$(
