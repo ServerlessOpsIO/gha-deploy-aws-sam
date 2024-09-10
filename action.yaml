@@ -11,7 +11,7 @@ inputs:
   cfn_capabilities:
     description: "Comma separated list of capabilities to enable. (values: CAPABILITY_IAM, CAPABILITY_NAMED_IAM, CAPABILITY_RESOURCE_POLICY, CAPABILITY_RESOURCE_POLICY)"
     required: false
-    default: CAPABILITY_IAM
+    default: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
   cfn_exec_role_name:
     description: Name of CloudFormation IAM execution role
     required: false
@@ -160,7 +160,6 @@ runs:
         S3_PREFIX: ${{ steps.set-sam-s3-prefix.outputs.s3-prefix }}
         STACK_NAME: ${{ steps.set-stack-name.outputs.name }}
         TEMPLATE_FILE: ${{ inputs.template_file }}
-        CFN_CAPABILITIES: ${{ inputs.cfn_capabilities }}
         CFN_TAGS: ${{ steps.process-aws-tags.outputs.tags }}
         CFN_PARAMS: ${{ steps.process-aws-parameters.outputs.parameters }}
       shell: bash
@@ -173,6 +172,6 @@ runs:
           --role-arn arn:aws:iam::${ACCOUNT_ID}:role/${CFN_EXEC_ROLE} \
           --region ${REGION} \
           --on-failure DELETE \
-          --capabilities ${CFN_CAPABILITIES} \
+          --capabilities ${{ inputs.cfn_capabilities }} \
           --parameter-overrides "${CFN_PARAMS}" \
           --tags "${CFN_TAGS}"
