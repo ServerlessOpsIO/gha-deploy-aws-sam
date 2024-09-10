@@ -1,0 +1,163 @@
+name: 'deploy-aws-sam'
+description: 'Deploy via AWS SAM'
+
+inputs:
+  aws_account_id:
+    description: Account ID of account to deploy to.
+    required: true
+  aws_region:
+    description: Region to deploy to
+    required: false
+  cfn_capabilities:
+    description: "Comma separated list of capabilities to enable. (values: CAPABILITY_IAM, CAPABILITY_NAMED_IAM, CAPABILITY_RESOURCE_POLICY, CAPABILITY_RESOURCE_POLICY)"
+    required: false
+  cfn_exec_role_name:
+    description: Name of optional CloudFormation IAM execution role
+    required: false
+  cfn_parameters_file:
+    description: Name of CFN parameters file
+    required: false
+    default: cfn-parameters.json
+  cfn_tags_file:
+    description: Name of CFN tags file
+    required: false
+    default: cfn-tags.json
+  stack_name:
+    description: Name of stack that will be deployed
+    required: false
+  template_file:
+    description: Name of template file to deploy
+    required: false
+    default: template.yaml
+  sam_s3_bucket:
+    description: S3 bucket for SAM deployment
+    required: false
+  sam_s3_prefix:
+    description: S3 prefix for SAM deployment
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Install AWS SAM
+      id: install-sam
+      uses: aws-actions/setup-sam@v2
+
+    - name: Set SAM S3 Bucket
+      id: set-sam-s3-bucket
+      env:
+        SAM_S3_BUCKET: ${{ inputs.sam_s3_bucket }}
+        AWS_ACCOUNT_ID: ${{ inputs.aws_account_id }}
+        AWS_REGION: ${{ inputs.aws_region || env.AWS_REGION }}
+      shell: bash
+      run: |
+        if [ -z "${SAM_S3_BUCKET}" ]; then
+          s3_bucket="aws-sam-cli-sourcebucket-${AWS_ACCOUNT_ID}-${AWS_REGION}";
+        else
+          s3_bucket="${SAM_S3_BUCKET}";
+        fi;
+        echo "SAM S3 bucket resolved to: $s3_bucket"
+        echo "s3-bucket=$s3_bucket" >> $GITHUB_OUTPUT
+
+    - name: Set SAM S3 prefix
+      id: set-sam-s3-prefix
+      env:
+        SAM_S3_PREFIX: ${{ inputs.sam_s3_prefix }}
+      shell: bash
+      run: |
+        if [ -z "${SAM_S3_PREFIX}" ]; then
+          s3_prefix="${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}/${{ env.GITHUB_REF_SLUG_URL }}";
+        else
+          s3_prefix="${SAM_S3_PREFIX}";
+        fi;
+        echo "SAM S3 prefix resolved to: $s3_prefix"
+        echo "s3-prefix=$s3_prefix" >> $GITHUB_OUTPUT
+
+    - name: Set stack name
+      id: set-stack-name
+      env:
+        STACK_NAME: ${{ inputs.stack_name }}
+      shell: bash
+      run: |
+        if [ -z "${STACK_NAME}" ]; then
+          stack_name="${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}-${{ env.GITHUB_EVENT_REF_SLUG_URL }}";
+        else
+          stack_name="${STACK_NAME}";
+        fi;
+        echo "CFN stack name resolved to: $stack_name"
+        echo "name=$stack_name" >> $GITHUB_OUTPUT
+
+    - name: Process AWS Tags
+      id: process-aws-tags
+      shell: bash
+      env:
+        BRANCH: ${{ env.GITHUB_EVENT_REF_SLUG_URL }}
+        TAGS_FILE: ${{ inputs.cfn_tags_file }}
+      run: |
+        AWS_CFN_TAGS=$(
+          cat $TAGS_FILE |
+          jq -r '
+            to_entries |
+            map("\(.key)=\(.value|tostring)") |
+            . += [
+              "org:repo=${GITHUB_REPOSITORY}"
+              "org:branch=${GITHUB_REF_NAME}",
+              "org:commit=${GITHUB_SHA}",
+              "org:stackName=${{ steps.set-stack-name.outputs.name }}"
+            ] |
+            join(",")
+          '
+        )
+        echo "Resolved Cloudformation tags: ${AWS_CFN_TAGS}"
+        echo "tags=${AWS_CFN_TAGS}">> $GITHUB_OUTPUT
+
+    - name: Process CloudFormation Parameters
+      id: process-aws-parameters
+      shell: bash
+      env:
+        GHA_SECRETS: ${{ torJson(secrets) }}
+        GHA_ENV: ${{ toJson(env) }}
+        PARAMS_FILE: ${{ inputs.cfn_parameters_file }}
+      run: |
+        AWS_CFN_PARAMS=$(
+          jq \
+            -n \
+            --argjson secrets "$GHA_SECRETS" \
+            --argjson env "$GHA_ENV" \
+            -f $PARAMS_FILE |
+          jq \
+            -r '
+              to_entries |
+              map("\(.key)=\(.value|tostring)") |
+              join(",")
+            '
+        )
+        echo "Resolved CFN parameters: $AWS_CFN_PARAMS"
+        echo "parameters=${AWS_CFN_PARAMS}" >> $GITHUB_OUTPUT
+
+    - name: Deploy via SAM
+      id: deploy-sam
+      env:
+        CFN_EXEC_ROLE: ${{ inputs.cfn_exec_role_name }}
+        ACCOUNT_ID: ${{ inputs.aws_account_id }}
+        REGION: ${{ inputs.aws_region || env.AWS_REGION }}
+        S3_BUCKET: ${{ steps.set-sam-s3-bucket.outputs.s3-bucket }}
+        S3_PREFIX: ${{ steps.set-sam-s3-prefix.outputs.s3-prefix }}
+        STACK_NAME: ${{ steps.set-stack-name.outputs.name }}
+        TEMPLATE_FILE: ${{ inputs.template_file }}
+        CFN_CAPABILITIES: ${{ inputs.cfn_capabilities }}
+        CFN_TAGS: ${{ steps.process-aws-tags.outputs.tags }}
+        CFN_PARAMS: ${{ steps.process-aws-parameters.outputs.parameters }}
+      shell: bash
+      run: |
+        sam deploy \
+          --template-file ${TEMPLATE_FILE} \
+          --stack-name ${STACK_NAME} \
+          --s3-bucket ${S3_BUCKET} \
+          --s3-prefix ${S3_PREFIX} \
+          --role-arn arn:aws:iam::${ACCOUNT_ID}:role/${CFN_EXEC_ROLE} \
+          --region ${REGION} \
+          --on-failure DELETE \
+          --capabilities ${CFN_CAPABILITIES} \
+          --parameter-overrides "${CFN_PARAMS}" \
+          --tags "${CFN_TAGS}"
