@@ -28,6 +28,8 @@ See below for inputs, outputs, and examples.
 - `template_file` (optional): Name of the template file to deploy. Default is `template.yaml`.
 - `sam_s3_bucket` (optional): S3 bucket for SAM deployment.
 - `sam_s3_prefix` (optional): S3 prefix for SAM deployment.
+- `env_json` (optional): JSON string of environment context object. For use resolving values in CFN parameters file.
+- `secret_json` (optional): JSON string of secret context object. For use resolving values in CFN parameters file.
 
 ### Outputs
 
