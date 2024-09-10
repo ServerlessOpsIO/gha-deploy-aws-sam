@@ -111,7 +111,7 @@ runs:
             to_entries |
             map("\(.key)=\(.value|tostring)") |
             . += [
-              "org:repo=${GITHUB_REPOSITORY}"
+              "org:repo=${GITHUB_REPOSITORY}",
               "org:branch=${GITHUB_REF_NAME}",
               "org:commit=${GITHUB_SHA}",
               "org:stackName=${{ steps.set-stack-name.outputs.name }}"
