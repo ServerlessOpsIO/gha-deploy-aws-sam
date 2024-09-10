@@ -20,7 +20,7 @@ See below for inputs, outputs, and examples.
 
 - `aws_account_id` (required): Account ID of the account to deploy to.
 - `aws_region` (optional): Region to deploy to. If not set, will use AWS_REGION set by [gha-assume-aws-credentials](https://github.com/ServerlessOpsIO/gha-assume-aws-credentials)
-- `cfn_capabilities` (optional): Comma-separated list of capabilities to enable. (values: CAPABILITY_IAM, CAPABILITY_NAMED_IAM, CAPABILITY_RESOURCE_POLICY, CAPABILITY_RESOURCE_POLICY)
+- `cfn_capabilities` (optional): space-separated list of capabilities to enable. (values: CAPABILITY_IAM, CAPABILITY_NAMED_IAM, CAPABILITY_AUTO_EXPAND, CAPABILITY_RESOURCE_POLICY)
 - `cfn_exec_role_name` (optional): Name of the optional CloudFormation IAM execution role.
 - `cfn_parameters_file` (optional): Name of the CloudFormation parameters file. Default is `cfn-parameters.json`.
 - `cfn_tags_file` (optional): Name of the CloudFormation tags file. Default is `cfn-tags.json`.
