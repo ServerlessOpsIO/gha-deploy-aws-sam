@@ -104,10 +104,6 @@ runs:
       env:
         BRANCH: ${{ env.GITHUB_EVENT_REF_SLUG_URL }}
         TAGS_FILE: ${{ inputs.cfn_tags_file }}
-        GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
-        GITHUB_REF_NAME: ${{ env.GITHUB_REF_NAME }}
-        GITHUB_SHA: ${{ env.GITHUB_SHA }}
-        STACK_NAME: ${{ steps.set-stack-name.outputs.name }}
       run: |
         AWS_CFN_TAGS=$(
           cat $TAGS_FILE |
@@ -115,10 +111,10 @@ runs:
             to_entries |
             map("\(.key)=\(.value|tostring)") |
             . += [
-              "org:repo=${GITHUB_REPOSITORY}",
-              "org:branch=${GITHUB_REF_NAME}",
-              "org:commit=${GITHUB_SHA}",
-              "org:stackName=${STACK_NAME}"
+              "org:repo=${{ env.GITHUB_REPOSITORY }}",
+              "org:branch=${{ env.GITHUB_REF_NAME }}",
+              "org:commit=${{ env.GITHUB_SHA }}",
+              "org:stackName=${{ steps.set-stack-name.outputs.name }}"
             ] |
             join(" ")
           '
