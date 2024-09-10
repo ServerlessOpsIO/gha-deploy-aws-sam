@@ -120,7 +120,7 @@ runs:
               "org:commit=${GITHUB_SHA}",
               "org:stackName=${STACK_NAME}"
             ] |
-            join(",")
+            join(" ")
           '
         )
         echo "Resolved Cloudformation tags: ${AWS_CFN_TAGS}"
@@ -144,7 +144,7 @@ runs:
             -r '
               to_entries |
               map("\(.key)=\(.value|tostring)") |
-              join(",")
+              join(" ")
             '
         )
         echo "Resolved CFN parameters: $AWS_CFN_PARAMS"
