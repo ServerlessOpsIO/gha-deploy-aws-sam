@@ -9,7 +9,7 @@ inputs:
     description: Region to deploy to
     required: false
   cfn_capabilities:
-    description: "Space separated list of capabilities to enable. (values: CAPABILITY_IAM, CAPABILITY_NAMED_IAM, CAPABILITY_AUTO_EXPAND, CAPABILITY_RESOURCE_POLICY)"
+    description: "Comma-separated list of capabilities to enable. (values: CAPABILITY_IAM, CAPABILITY_NAMED_IAM, CAPABILITY_AUTO_EXPAND, CAPABILITY_RESOURCE_POLICY)"
     required: false
     default: CAPABILITY_NAMED_IAM
   cfn_exec_role_name:
@@ -169,6 +169,6 @@ runs:
           --role-arn arn:aws:iam::${ACCOUNT_ID}:role/${CFN_EXEC_ROLE} \
           --region ${REGION} \
           --on-failure DELETE \
-          --capabilities ${CAPABILITIES} \
+          --capabilities ${CAPABILITIES//,/ } \
           --parameter-overrides ${CFN_PARAMS} \
           --tags ${CFN_TAGS}
