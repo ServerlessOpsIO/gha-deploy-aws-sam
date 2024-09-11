@@ -88,11 +88,59 @@ jobs:
 
 ### Configuration
 
-Additional configuration notes
+Additional configuration notes.
 
 #### S3 Bucket
 
 The default value for `sam_s3_bucket` comes from [ServerlessOpsIO/aws-gha-integration](https://github.com/ServerlessOpsIO/aws-gha-integration). Both the `sam_s3_bucket` and `sam_s3_prefix` should not need to be configured but are avavailbel for unique circumstances.
+
+#### CloudFormation Tags
+
+By default the the action will look for a `cfn-tags.json` file in the root of the repository. The file used can be changed using the `cfn_tags_file` parameter. This file should be a JSON object with key-value pairs for tags. The action will automatically convert this file into a format that AWS SAM expects. The action will also set some additional default tags based on information gathered from the job. eg. GitHub repository, branch, and commit. These tags will be applied to the stack at deploy time and CloudFormation will apply them to resources that support tagging.
+
+Example cfn-tags.json:
+```json
+{
+  "MyTag": "MyValue",
+  "MyOtherTag": "MyOtherValue"
+}
+```
+
+#### CloudFormation Parameters
+
+By default the the action will look for a `cfn-parameters.json` file in the root of the repository. The file used can be changed using the `cfn_parameters_file` parameter.  This file should be a JSON object with key-value pairs for parameters. The action will automatically convert this file into a format that AWS SAM expects.
+
+Example cfn-parameters.json:
+```json
+{
+  "MyParameter": "MyValue",
+  "MyOtherParameter": "MyOtherValue"
+}
+```
+
+##### Environment and Secrets Context values
+
+You may wish to use environment or secrets context values as parameter values. This is a great way to handle different parameter values for different application environments. To do so, you must pass a JSON string of those context objects to the `env_json` or `secret_json` parameters of this action. (This is due to limitations in GitHub Actions for passing context objects to composite actions.)
+
+Example GitHub Action workflow step:
+```yaml
+- name: Deploy via AWS SAM
+  uses: ServerlessOpsIO/gha-deploy-aws-sam@v1
+  with:
+    aws_account_id: ${{ secrets.AWS_STACKSETS_ACCOUNT_ID }}
+    env_json: ${{ toJson(env) }}
+    secrets_json: ${{ toJson(secrets) }}
+```
+
+Example `cfn-parameters.json` file:
+```json
+{
+  "MyParameterFromEnvironment": $env.MyValue,
+  "MyParameterFromSecrets": $secrets.MySecretValue
+}
+```
+
+This will unfortunately break any JSON linters you may have in your repository. You can ignore the error or disable the linter for the file.
 
 ## Contributing
 
