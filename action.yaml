@@ -102,7 +102,9 @@ runs:
       id: process-aws-tags
       shell: bash
       env:
-        BRANCH: ${{ env.GITHUB_EVENT_REF_SLUG_URL }}
+        GHA_SECRETS: ${{ inputs.secrets_json }}
+        GHA_ENV: ${{ inputs.env_json }}
+        PARAMS_FILE: ${{ inputs.cfn_parameters_file }}
         TAGS_FILE: ${{ inputs.cfn_tags_file }}
       run: |
         AWS_CFN_TAGS=$(
