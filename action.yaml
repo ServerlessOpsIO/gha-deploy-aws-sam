@@ -175,6 +175,7 @@ runs:
           --role-arn arn:aws:iam::${ACCOUNT_ID}:role/${CFN_EXEC_ROLE} \
           --region ${REGION} \
           --on-failure DELETE \
+          --no-fail-on-empty-changeset \
           --capabilities ${CAPABILITIES//,/ } \
           --parameter-overrides ${CFN_PARAMS} \
           --tags ${CFN_TAGS}
