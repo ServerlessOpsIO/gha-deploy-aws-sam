@@ -106,7 +106,11 @@ runs:
         TAGS_FILE: ${{ inputs.cfn_tags_file }}
       run: |
         AWS_CFN_TAGS=$(
-          cat $TAGS_FILE |
+          jq \
+            -n \
+            --argjson secrets "$GHA_SECRETS" \
+            --argjson env "$GHA_ENV" \
+            -f $TAGS_FILE |
           jq -r '
             to_entries |
             map("\(.key)=\(.value|tostring)") |
