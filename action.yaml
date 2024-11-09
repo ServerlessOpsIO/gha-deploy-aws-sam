@@ -42,6 +42,10 @@ inputs:
     description: JSON string of environment variables to pass to the action
     required: false
     default: '{}'
+  vars_json:
+    description: JSON string of repo and app env variables to pass to the action
+    required: false
+    default: '{}'
   secrets_json:
     description: JSON string of secrets to pass to the action
     required: false
@@ -134,6 +138,7 @@ runs:
       env:
         GHA_SECRETS: ${{ inputs.secrets_json }}
         GHA_ENV: ${{ inputs.env_json }}
+        GHA_VARS: ${{ inputs.vars_json }}
         PARAMS_FILE: ${{ inputs.cfn_parameters_file }}
       run: |
         AWS_CFN_PARAMS=$(
@@ -141,6 +146,7 @@ runs:
             -n \
             --argjson secrets "$GHA_SECRETS" \
             --argjson env "$GHA_ENV" \
+            --argjson vars "$GHA_VARS" \
             -f $PARAMS_FILE |
           jq \
             -r '
