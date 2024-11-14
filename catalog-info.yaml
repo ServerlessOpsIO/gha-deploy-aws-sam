@@ -1,0 +1,13 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: gha-deploy-aws-sam
+  description: Deploy via AWS SAM
+  annotations:
+    github.com/project-slug: ServerlessOpsIO/gha-deploy-aws-sam
+spec:
+  type: gha-action
+  lifecycle: production
+  owner: group:developers
+  system: system:github-actions
