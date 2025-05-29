@@ -182,5 +182,5 @@ runs:
           --on-failure DELETE \
           --no-fail-on-empty-changeset \
           --capabilities ${CAPABILITIES//,/ } \
-          --parameter-overrides ${CFN_PARAMS} \
-          --tags ${CFN_TAGS}
+          --parameter-overrides "${CFN_PARAMS}" \
+          --tags "${CFN_TAGS}"
