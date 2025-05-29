@@ -123,7 +123,6 @@ runs:
             . += [
               "org:repo=${{ env.GITHUB_REPOSITORY }}",
               "org:branch=${{ env.GITHUB_REF_NAME }}",
-              "org:commit=${{ env.GITHUB_SHA }}",
               "org:stackName=${{ steps.set-stack-name.outputs.name }}"
             ] |
             join(" ")
