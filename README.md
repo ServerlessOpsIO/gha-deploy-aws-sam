@@ -25,7 +25,7 @@ See below for inputs, outputs, and examples.
 - `cfn_parameters_file` (optional): Name of the CloudFormation parameters file. Default is `cfn-parameters.json`.
 - `cfn_tags_file` (optional): Name of the CloudFormation tags file. Default is `cfn-tags.json`.
 - `stack_name` (optional): Name of the stack that will be deployed.
-- `template_file` (optional): Name of the template file to deploy. Default is `template.yaml`.
+- `template_file` (optional): Name of the template file to deploy. Default is `packaged-template.yaml`. (Created by [ServerlessOpsIO/gha-package-aws-sam](https://github.com/ServerlessOpsIO/gha-package-aws-sam))
 - `sam_s3_bucket` (optional): S3 bucket for SAM deployment.
 - `sam_s3_prefix` (optional): S3 prefix for SAM deployment.
 - `env_json` (optional): JSON string of environment context object. For use resolving values in CFN parameters file.
@@ -49,8 +49,6 @@ jobs:
     steps:
       - name: Setup job workspace
         uses: ServerlessOpsIO/gha-setup-workspace@v1
-        with:
-          checkout_artifact: true
 
       - name: Assume AWS Credentials
         uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
@@ -76,9 +74,9 @@ jobs:
       - name: Assume AWS Credentials
           uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
           with:
-          build_aws_account_id: ${{ secrets.BUILD_AWS_ACCOUNT_ID }}
-          deploy_aws_account_id: ${{ secrets.DEPLOY_AWS_ACCOUNT_ID }}
-          aws_account_region: 'us-east-1'
+            build_aws_account_id: ${{ secrets.BUILD_AWS_ACCOUNT_ID }}
+            deploy_aws_account_id: ${{ secrets.DEPLOY_AWS_ACCOUNT_ID }}
+            aws_account_region: 'us-east-1'
 
       - name: Deploy via AWS CloudFormation
         uses: ServerlessOpsIO/gha-deploy-aws-sam@v1
@@ -119,9 +117,9 @@ Example cfn-parameters.json:
 }
 ```
 
-##### Environment and Secrets Context values
+##### Repo Variables, Repo Secrets, and Workflow Environment values
 
-You may wish to use environment or secrets context values as parameter values. This is a great way to handle different parameter values for different application environments. To do so, you must pass a JSON string of those context objects to the `env_json` or `secret_json` parameters of this action. (This is due to limitations in GitHub Actions for passing context objects to composite actions.)
+You may wish to use GitHub repository variables, GitHub repository secrets, or workflow run context values as cloudformation parameter values. This is a great way to handle different parameter values for different application environments. To do so, you must pass a JSON string of those context objects to the `vars_json`, `secret_json`, or `env_json` parameters of this action. (This is due to limitations in GitHub Actions for passing context objects to composite actions.)
 
 Example GitHub Action workflow step:
 ```yaml
@@ -130,14 +128,16 @@ Example GitHub Action workflow step:
   with:
     aws_account_id: ${{ secrets.AWS_STACKSETS_ACCOUNT_ID }}
     env_json: ${{ toJson(env) }}
+    vars_json: ${{ toJSON(vars) }}
     secrets_json: ${{ toJson(secrets) }}
 ```
 
 Example `cfn-parameters.json` file:
 ```json
 {
-  "MyParameterFromEnvironment": $env.MyValue,
-  "MyParameterFromSecrets": $secrets.MySecretValue
+  "MyParameterFromWorkflowRunEnvironment": $env.EnvJsonKey,
+  "MyParameterFromRepoVariables": $vars.VarsJsonKey,
+  "MyParameterFromRepoSecrets": $secrets.SecretsJsonKey
 }
 ```
 

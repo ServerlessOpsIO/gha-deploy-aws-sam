@@ -115,6 +115,7 @@ runs:
           jq \
             -n \
             --argjson secrets "$GHA_SECRETS" \
+            --argjson vars "$GHA_VARS" \
             --argjson env "$GHA_ENV" \
             -f $TAGS_FILE |
           jq -r '
@@ -123,7 +124,6 @@ runs:
             . += [
               "org:repo=${{ env.GITHUB_REPOSITORY }}",
               "org:branch=${{ env.GITHUB_REF_NAME }}",
-              "org:commit=${{ env.GITHUB_SHA }}",
               "org:stackName=${{ steps.set-stack-name.outputs.name }}"
             ] |
             join(" ")
@@ -183,5 +183,5 @@ runs:
           --on-failure DELETE \
           --no-fail-on-empty-changeset \
           --capabilities ${CAPABILITIES//,/ } \
-          --parameter-overrides ${CFN_PARAMS} \
-          --tags ${CFN_TAGS}
+          --parameter-overrides "${CFN_PARAMS}" \
+          --tags "${CFN_TAGS}"
