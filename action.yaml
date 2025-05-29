@@ -115,6 +115,7 @@ runs:
           jq \
             -n \
             --argjson secrets "$GHA_SECRETS" \
+            --argjson vars "$GHA_VARS" \
             --argjson env "$GHA_ENV" \
             -f $TAGS_FILE |
           jq -r '
