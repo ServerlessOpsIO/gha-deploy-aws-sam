@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup job workspace
-        uses: ServerlessOpsIO/gha-setup-workspace@v1
+        uses: ServerlessOpsIO/gha-setup-workspace@v2
 
       - name: Assume AWS Credentials
         uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
@@ -57,7 +57,7 @@ jobs:
           aws_account_region: 'us-east-1'
 
       - name: Store artifacts
-        uses: ServerlessOpsIO/gha-store-artifacts@v1
+        uses: ServerlessOpsIO/gha-store-artifacts@v2
         with:
           use_aws_sam: true
 
@@ -67,7 +67,7 @@ jobs:
       - build
     steps:
       - name: Setup job workspace
-        uses: ServerlessOpsIO/gha-setup-workspace@v1
+        uses: ServerlessOpsIO/gha-setup-workspace@v2
         with:
           checkout_artifact: true
 
