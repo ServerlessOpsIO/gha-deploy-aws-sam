@@ -56,7 +56,7 @@ runs:
   steps:
     - name: Install AWS SAM
       id: install-sam
-      uses: aws-actions/setup-sam@v2
+      uses: aws-actions/setup-sam@v3
 
     - name: Set SAM S3 Bucket
       id: set-sam-s3-bucket
