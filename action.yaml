@@ -152,7 +152,7 @@ runs:
           jq \
             -r '
               to_entries |
-              map("\(.key)=\"\(.value|tostring)\"") |
+              map(if .value == null then "\(.key)=" else "\(.key)=\"\(.value)\"" end) |
               join(" ")
             '
         )
